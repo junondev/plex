@@ -2,8 +2,8 @@
 BASH scripts for interacting with Plex Media Server.
 
 ## Requirements
-* *curl*
-* Install *curl* on Debian based systems (including Ubuntu) with: `sudo apt update && sudo apt install curl`
+* `curl`
+* Install _curl_ on Debian based systems (including Ubuntu) with: `sudo apt update && sudo apt install curl`
 
 ## Versions
 * These scripts are tailored to the Ubuntu x86_64 version of Plex Media Server, but can be easily changed by editing the user supplied variables at the top of the scripts.
