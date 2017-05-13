@@ -1,0 +1,4 @@
+#!/bin/bash
+# plex-update-short - Downloads and installs the latest version of Plex Media Server (Plex Pass, Ubuntu, x86_64 version)
+
+curl -vLo "/tmp/plex.deb" "https://plex.tv/downloads/latest/1?channel=8&build=linux-ubuntu-x86_64&distro=ubuntu&X-Plex-Token=$(grep -Eo 'PlexOnlineToken[^ ]+' '/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Preferences.xml' | cut -d '"' -f 2)"; dpkg -i /tmp/plex.deb; sudo systemctl restart plexmediaserver; rm -vf /tmp/plex.deb
