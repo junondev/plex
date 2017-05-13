@@ -1,0 +1,37 @@
+#!/bin/bash
+# plex-update - Checks if Plex Media Server is the latest version, download and install if new version available.
+
+# User Supplied Variables
+PREF_FILE="/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Preferences.xml"	# Location of Preferences.xml file
+OUTPUT="/tmp/plex.deb"  # Where installation file should be saved temporarily
+LOCAL_URL="http://$(hostname -f):32400"  # URL of local plex server (must be running)
+BUILD="linux-ubuntu-x86_64"  # Build of plex.deb to download
+DISTRO="ubuntu"  # Distro of plex.deb to download
+CHANNEL="8"  # Plex version channel (8 is Plex Pass?)
+
+# Dynamic Variables
+TOKEN="$(grep -Eo 'PlexOnlineToken[^ ]+' "${PREF_FILE}" | cut -d '"' -f 2)"  # Carved auth token
+CURRENT_VERSION="$(curl -sLH "X-Plex-Token: ${TOKEN}" "${LOCAL_URL}" | grep MediaContainer | grep -Eo 'version[^ ]+' | cut -d '"' -f 2)"  # Local plex verison
+URL="https://plex.tv/downloads/latest/1?channel=${CHANNEL}&build=${BUILD}&distro=${DISTRO}&X-Plex-Token=${TOKEN}"  # Download URL
+LATEST_VERSION="$(basename $(curl -sLI "${URL}" | grep '^Location: ' | cut -d ' ' -f 2 | sed 's/\(plexmediaserver_\|_amd64.deb\|\r\)//g') )"  # Latest plex version
+
+# Check versions
+if [[ "${CURRENT_VERSION}" == "${LATEST_VERSION}" ]]; then
+    echo "The latest version is already installed."
+    exit 2
+else
+    echo "Downloading latest version..."
+    curl -o "${OUTPUT}" -L "${URL}"
+fi
+
+# Install
+echo "Installing new version..."
+dpkg -i "${OUTPUT}"
+
+# Restart
+echo "Restarting Plex Media Server service..."
+sudo systemctl restart plexmediaserver
+
+# Cleanup
+echo "Cleaning up install files..."
+rm -vf "${OUTPUT}"
